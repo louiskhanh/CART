@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8"> 
+		<title> Angular Cart </title>
+		<link href="http://netdna.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
+      	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
+		<script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"> </script> 
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script> 
+	</head>
+<body ng-app="app"> 
+<div class="container" ng-controller="lkCartCtrl">
+    <div class="row">
+		<div class="col-md-8">
+			<h1> ANGULAR CART </h1>
+		</div>
+		<div class="col-md-4">
+            <h4>
+                YOUR CART 
+            </h4>
+
+            <table id="cart" class="table table-bordered table-hover">
+                <tr>
+                    <th>ID</th>
+                    <th style="width: 100%">PRODUCT</th>
+                    <th>PRICE</th>
+                    <th>QUANTITY</th>
+                    <th>TOTAL</th>
+                    <th style="width: 1%"></th>
+
+                </tr>
+                <tr ng-repeat="p in productsInCart">
+                    <td>{{ p.id }}</td>
+                    <td>{{ p.name }}</td>
+                    <td>${{ p.price }}</td>
+                    <td>
+                        <input class="form-control" type="number" min="1" max="999" value="1" ng-model="p.quantity"/>
+                    </td>
+                    <td class="text-right">
+                        ${{ p.price * p.quantity }}</td>
+                    <td>
+                        <button ng-click="remove(p)" class="btn btn-sm btn-danger">
+                            <span class="glyphicon glyphicon-trash"></span>
+                        </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-right" style="font-weight: bold" colspan="4">Total:</td>
+                    <td>
+                        ${{ Total() }}
+                    </td>
+                    <td>
+					</td>
+                </tr>
+            </table>
+        </div> 
+		
+	</div>    
+    <hr>
+    <div class="row">
+        <div class="col-md-12">
+            <h4>
+                PRODUCTS
+            </h4>
+            <div class="row">
+                <div ng-repeat="p in products" class="col-md-3 col-sm-6">
+                    <div class="img-thumbnail text-center" style="margin-bottom: 30px; padding: 20px">
+                        <img ng-src="{{ p.imageUrl }}" class="img img-responsive">
+                        <h5>{{ p.name }}</h5>
+                        <h6>Price: ${{ p.price }}</h6>
+                        <button ng-click="add(p)" class="btn btn-primary">
+                            <span class="glyphicon glyphicon-plus"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+   	
+    <div class="row" ng-controller="lkCartCtrl">
+        <h3>{{title}}</h3>
+        <button class="btn btn-primary" ng-click="showModal1 = true">Show Modal</button>
+        <button class="btn btn-primary" ng-click="showModal2 = true">Show Static Modal</button>
+        <modal visible="showModal1" on-sown="modalOneShown()" on-hide="modalOneHide()">
+            <modal-header title="Modal Titel 1"></modal-header>
+            <modal-body>
+                <h3>This is modal body</h3>
+            </modal-body>
+            <modal-footer>
+                <button class="btn btn-primary"  ng-click="hide(1)">Save</button>
+            </modal-footer>
+        </modal>
+        
+        <modal visible="showModal2" backdrop="static">
+            <modal-header title="Modal Titel 2"></modal-header>
+            <modal-body>
+                <h3>This is modal body</h3>
+            </modal-body>
+            <modal-footer>
+                <button class="btn btn-primary" ng-click="hide(2)">Save</button>
+            </modal-footer>
+        </modal>
+     </div>
+    <hr>
+</div>
+
+
+<script>
+    
+    var products = [
+        {id: "MC001", name: "MAN CITY HOME 15/16", price: "80", imageUrl: "images/mancity.jpg"},
+        {id: "RM002", name: "REAL MADRID AWAY 15/16", price: "75", imageUrl: "images/real.jpg"},
+        {id: "INT01", name: "INTER MILAN AWAY 15/16", price: "90", imageUrl: "images/inter.jpg"},
+        {id: "ARS4", name: "ARSENAL HOME 15/16", price: "75", imageUrl: "images/arsenal.jpg"}
+    ];
+
+    var app = angular.module('app', []);
+	app.controller("lkCartCtrl", function ($scope) {
+        $scope.title = "Angularjs Bootstrap Modal Directive Example";
+		$scope.showModal1 = false;
+		$scope.showModal2 = false;
+
+		$scope.hide = function(m){
+			if(m === 1){
+				$scope.showModal1 = false;
+			}else{
+				$scope.showModal2 = false;
+			}
+		}
+
+		$scope.modalOneShown = function(){
+			console.log('model one shown');
+		}
+
+		$scope.modalOneHide = function(){
+			console.log('model one hidden');
+		}
+		
+		
+		
+		$scope.products = products; 
+        var productsInCart = [];
+        $scope.productsInCart = productsInCart;
+
+        $scope.add = function (product) {
+
+            var existItem = {};
+
+            angular.forEach($scope.productsInCart, function (item, index) {
+                if (item.id === product.id) {
+                    existItem = item; 
+					
+                    return false; 
+                }
+				
+            });
+
+            if (existItem.id !== undefined) {
+                existItem.quantity++;
+            }
+            else {
+
+                var cartItem = product; //angular.copy(product)
+                cartItem.quantity = 1;
+                $scope.productsInCart.push(cartItem);
+            }
+        };
+
+        $scope.remove = function (cartItem) {
+
+            var index = $scope.productsInCart.indexOf(cartItem);
+            $scope.productsInCart.splice(index,1);
+
+        };
+
+        $scope.Total = function () {
+            var total = 0;
+            angular.forEach($scope.productsInCart, function (item, index) {
+               total += (item.price * item.quantity);
+            })
+
+            return total;
+        }
+
+    });
+	
+	app.directive('modal', function(){
+        return {
+            template: '<div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true"><div class="modal-dialog modal-sm"><div class="modal-content" ng-transclude><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="myModalLabel">Modal title</h4></div></div></div></div>', 
+            restrict: 'E',
+            transclude: true,
+            replace:true,
+            scope:{visible:'=', onSown:'&', onHide:'&'},   
+            link:function postLink(scope, element, attrs){
+                
+                $(element).modal({
+                    show: false, 
+                    keyboard: attrs.keyboard, 
+                    backdrop: attrs.backdrop
+                });
+                
+                scope.$watch(function(){return scope.visible;}, function(value){
+                    
+                    if(value == true){
+                        $(element).modal('show');
+                    }else{
+                        $(element).modal('hide');
+                    }
+                });
+                
+                $(element).on('shown.bs.modal', function(){
+                  scope.$apply(function(){
+                    scope.$parent[attrs.visible] = true;
+                  });
+                });
+                
+                $(element).on('shown.bs.modal', function(){
+                  scope.$apply(function(){
+                      scope.onSown({});
+                  });
+                });
+
+                $(element).on('hidden.bs.modal', function(){
+                  scope.$apply(function(){
+                    scope.$parent[attrs.visible] = false;
+                  });
+                });
+                
+                $(element).on('hidden.bs.modal', function(){
+                  scope.$apply(function(){
+                      scope.onHide({});
+                  });
+                });
+            }
+        };
+    }
+);
+
+app.directive('modalHeader', function(){
+    return {
+        template:'<div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title">{{title}}</h4></div>',
+        replace:true,
+        restrict: 'E',
+        scope: {title:'@'}
+    };
+});
+
+app.directive('modalBody', function(){
+    return {
+        template:'<div class="modal-body" ng-transclude></div>',
+        replace:true,
+        restrict: 'E',
+        transclude: true
+    };
+});
+
+app.directive('modalFooter', function(){
+    return {
+        template:'<div class="modal-footer" ng-transclude></div>',
+        replace:true,
+        restrict: 'E',
+        transclude: true
+    };
+});
+
+
+</script>
+</body>
+</html>
